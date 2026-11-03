@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Sekolah;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +10,13 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class SekolahFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Sekolah::class;
+
     public function definition(): array
     {
         return [
-            //
+            'nama' => 'SD Negeri ' . fake('id_ID')->city() . ' ' . fake()->numberBetween(1, 10),
+            'alamat' => 'Jl. ' . fake('id_ID')->streetName() . ' No. ' . fake()->numberBetween(1, 100),
         ];
     }
 }

@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Penjemputan;
+use App\Models\PihakBerwenang;
+use App\Models\SerahTerima;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +12,16 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class SerahTerimaFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = SerahTerima::class;
+
     public function definition(): array
     {
         return [
-            //
+            'penjemputan_id' => Penjemputan::factory(),
+            'penerima_id' => PihakBerwenang::factory()->penerima(),
+            'kode_input' => fake()->numerify('######'),
+            'dikonfirmasi_at' => now(),
+            'bukti_path' => null,
         ];
     }
 }

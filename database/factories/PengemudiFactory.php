@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Pengemudi;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +11,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PengemudiFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Pengemudi::class;
+
     public function definition(): array
     {
         return [
-            //
+            'user_id' => User::factory()->pengemudi(),
+            'no_kendaraan' => 'B ' . fake()->numerify('####') . ' ' . fake()->randomElement(['ABC', 'XYZ', 'JKT', 'BKS']),
+            'jenis_kendaraan' => fake()->randomElement(['Mobil Avanza', 'Mobil Xenia', 'Mobil Innova', 'Motor Vario']),
+            'aktif' => true,
         ];
     }
 }

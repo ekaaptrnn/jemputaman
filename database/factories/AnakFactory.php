@@ -2,6 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Anak;
+use App\Models\Sekolah;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,15 +12,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class AnakFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Anak::class;
+
     public function definition(): array
     {
         return [
-            //
+            'orang_tua_id' => User::factory()->orangTua(),
+            'sekolah_id' => Sekolah::factory(),
+            'nama' => fake('id_ID')->name(),
+            'kelas' => fake()->randomElement(['1A', '2B', '3C', '4A', '5B', '6C']),
         ];
     }
 }
