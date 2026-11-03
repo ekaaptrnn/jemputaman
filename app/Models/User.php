@@ -4,12 +4,16 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.
@@ -20,6 +24,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'no_hp',
     ];
 
     /**
@@ -43,5 +49,52 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relasi ke data anak (jika role orang_tua).
+     */
+    public function anak(): HasMany
+    {
+        return $this->hasMany(Anak::class, 'orang_tua_id');
+    }
+
+    /**
+     * Relasi ke data pengemudi (jika role pengemudi).
+     */
+    public function pengemudi(): HasOne
+    {
+        return $this->hasOne(Pengemudi::class);
+    }
+
+    /**
+     * Relasi ke notifikasi.
+     */
+    public function notifikasi(): HasMany
+    {
+        return $this->hasMany(Notifikasi::class);
+    }
+
+    /**
+     * Helper cek peran.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isOrangTua(): bool
+    {
+        return $this->role === 'orang_tua';
+    }
+
+    public function isPengemudi(): bool
+    {
+        return $this->role === 'pengemudi';
+    }
+
+    public function isPenerima(): bool
+    {
+        return $this->role === 'penerima';
     }
 }
