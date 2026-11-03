@@ -1,66 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# JemputAman — Sistem Serah Terima Anak Antar-Jemput
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+JemputAman adalah aplikasi web pembelajaran berbasis Laravel 11 untuk mencatat jadwal, pihak yang berwenang, alur status perjalanan, dan konfirmasi serah terima antar-jemput anak sekolah dengan kode verifikasi simulatif. Aplikasi ini menggunakan data fiktif (dummy) tanpa data pribadi nyata maupun pelacakan GPS langsung.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Teknologi yang Digunakan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Framework:** Laravel 11 (PHP 8.2+)
+- **Database:** SQLite (bawaan pengembangan) atau MySQL (Laragon / XAMPP)
+- **Frontend:** Blade Templating, Tailwind CSS
+- **Autentikasi:** Autentikasi Manual Laravel (tanpa Breeze/Jetstream) dengan peran berbasis Middleware (`EnsureRole`)
+- **Testing:** PHPUnit Feature Test (`php artisan test`)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 2. Cara Instalasi dari Nol
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Ikuti langkah-langkah berikut untuk menjalankan proyek di komputer lokal:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### 2.1 Clone Repositori dan Pasang Dependensi
+```bash
+git clone <url-repositori-github>
+cd jemputaman
+composer install
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 2.2 Konfigurasi Environment
+Salin template konfigurasi `.env.example` ke `.env`:
+- **Windows (PowerShell / CMD):**
+  ```powershell
+  copy .env.example .env
+  ```
+- **Linux / macOS:**
+  ```bash
+  cp .env.example .env
+  ```
 
-## Laravel Sponsors
+Generate application key:
+```bash
+php artisan key:generate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2.3 Siapkan Database SQLite
+Buat file `database.sqlite` di dalam folder `database/`:
+- **Windows (PowerShell):**
+  ```powershell
+  New-Item -ItemType File -Path database/database.sqlite
+  ```
+- **Windows (CMD):**
+  ```cmd
+  type nul > database\database.sqlite
+  ```
+- **Linux / macOS:**
+  ```bash
+  touch database/database.sqlite
+  ```
 
-### Premium Partners
+### 2.4 Jalankan Migrasi dan Seeder
+Eksekusi migrasi tabel dan isi data awal dummy:
+```bash
+php artisan migrate:fresh --seed
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 2.5 Jalankan Server Lokal
+```bash
+php artisan serve
+```
+Akses aplikasi melalui peramban web di: `http://127.0.0.1:8000`
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 3. Cara Beralih ke Database MySQL
 
-## Code of Conduct
+Bila ingin menggunakan MySQL (misalnya melalui Laragon atau XAMPP):
+1. Buat database baru di MySQL, misalnya bernama `jemputaman`.
+2. Sesuaikan konfigurasi di file `.env`:
+   ```dotenv
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=jemputaman
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+3. Jalankan migrasi dan seeder ulang:
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## 4. Tabel Akun Dummy (Seeder)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Seluruh akun dummy menggunakan password seragam: **`password`**
 
-## License
+| No | Peran (Role) | Nama | Email | Deskripsi Akses |
+|---|---|---|---|---|
+| 1 | `admin` | Admin JemputAman | `admin@jemputaman.test` | Akses penuh CRUD dan seluruh data |
+| 2 | `orang_tua` | Budi Santoso | `ortu1@jemputaman.test` | Memiliki 2 anak (Kenzo Pratama, Alina Putri) |
+| 3 | `orang_tua` | Siti Rahma | `ortu2@jemputaman.test` | Memiliki 2 anak (Rizky Ramadhan, Zahra Aulia) |
+| 4 | `pengemudi` | Pak Joko Widodo (Driver 1) | `driver1@jemputaman.test` | Mobil Avanza (B 1234 ABC), jadwal anak ortu1 |
+| 5 | `pengemudi` | Pak Bambang (Driver 2) | `driver2@jemputaman.test` | Motor Vario (B 5678 XYZ), jadwal anak ortu2 |
+| 6 | `penerima` | Nenek Maryam | `penerima1@jemputaman.test` | Penerima terdaftar untuk anak ortu1 |
+| 7 | `penerima` | Paman Dani | `penerima2@jemputaman.test` | Penerima terdaftar untuk anak ortu2 |
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 5. Cara Menjalankan Pengujian (Feature Test)
+
+Pengujian otomatis menggunakan database SQLite in-memory (`:memory:`) sehingga tidak mempengaruhi database utama.
+Jalankan perintah:
+```bash
+php artisan test
+```
+
+Pengujian mencakup:
+- **`AuthTest`:** Pengujian login semua akun peran, penolakan password salah, proteksi tamu, dan proses logout.
+- **`RoleMiddlewareTest`:** Pengujian middleware `role:admin` (status 200 untuk admin, 403 untuk selain admin, redirect login untuk tamu).
+- **`ScopeVisibleToTest`:** Pembatasan visibilitas data query Eloquent menurut peran masing-masing.
+
+---
+
+## 6. Aturan Penamaan Tabel (Bentuk Tunggal)
+
+Kamus data JemputAman menggunakan penamaan tabel tunggal. Setiap model di `app/Models/` wajib mendefinisikan property `protected $table`:
+
+| Model | Nama Tabel di Database |
+|---|---|
+| `User` | `users` |
+| `Sekolah` | `sekolah` |
+| `Anak` | `anak` |
+| `Pengemudi` | `pengemudi` |
+| `PihakBerwenang` | `pihak_berwenang` |
+| `Jadwal` | `jadwal` |
+| `Penjemputan` | `penjemputan` |
+| `RiwayatStatus` | `riwayat_status` |
+| `SerahTerima` | `serah_terima` |
+| `Notifikasi` | `notifikasi` |
+
+Untuk menyaring data menurut peran user yang sedang login, gunakan scope `visibleTo()`:
+```php
+$dataAnak = Anak::visibleTo(auth()->user())->get();
+$dataPenjemputan = Penjemputan::visibleTo(auth()->user())->get();
+```
+
+Untuk membatasi route berdasarkan peran:
+```php
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // route khusus admin
+});
+```
+
+---
+
+## 7. Alur Cabang Git (Workflow Tim)
+
+- **`main`**: Cabang produksi stabil.
+- **`develop`**: Cabang integrasi utama tim. Semua fitur digabungkan ke cabang ini.
+- **`feature/<nama-fitur>`**: Cabang pengerjaan fitur per anggota (contoh: `feature/migration-model`, `feature/auth-role`).
+- **`docs/<nama-dokumen>`**: Cabang pengerjaan dokumentasi (contoh: `docs/readme-instalasi`).
