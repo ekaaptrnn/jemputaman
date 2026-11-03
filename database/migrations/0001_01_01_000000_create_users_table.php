@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default('orang_tua');
+            $table->string('no_hp')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
