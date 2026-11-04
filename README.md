@@ -1,13 +1,13 @@
 # JemputAman — Sistem Serah Terima Anak Antar-Jemput
 
-JemputAman adalah aplikasi web pembelajaran berbasis Laravel 11 untuk mencatat jadwal, pihak yang berwenang, alur status perjalanan, dan konfirmasi serah terima antar-jemput anak sekolah dengan kode verifikasi simulatif. Aplikasi ini menggunakan data fiktif (dummy) tanpa data pribadi nyata maupun pelacakan GPS langsung.
+JemputAman adalah aplikasi web pembelajaran berbasis Laravel 13 untuk mencatat jadwal, pihak yang berwenang, alur status perjalanan, dan konfirmasi serah terima antar-jemput anak sekolah dengan kode verifikasi simulatif. Aplikasi ini menggunakan data fiktif (dummy) tanpa data pribadi nyata maupun pelacakan GPS langsung.
 
 ---
 
 ## 1. Teknologi yang Digunakan
 
-- **Framework:** Laravel 11 (PHP 8.2+)
-- **Database:** SQLite (bawaan pengembangan) atau MySQL (Laragon / XAMPP)
+- **Framework:** Laravel 13 (PHP 8.2+)
+- **Database:** MySQL (XAMPP / Laragon) atau SQLite
 - **Frontend:** Blade Templating, Tailwind CSS
 - **Autentikasi:** Autentikasi Manual Laravel (tanpa Breeze/Jetstream) dengan peran berbasis Middleware (`EnsureRole`)
 - **Testing:** PHPUnit Feature Test (`php artisan test`)
