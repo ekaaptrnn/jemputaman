@@ -54,7 +54,7 @@ class Jadwal extends Model
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() || $user->isGuru()) {
             return $query;
         }
 

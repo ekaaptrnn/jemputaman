@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('sekolah_id')->constrained('sekolah');
             $table->string('nama');
             $table->string('kelas');
+            $table->string('kode_qr')->unique();
             $table->timestamps();
         });
     }

@@ -6,7 +6,6 @@ use App\Models\Anak;
 use App\Models\Jadwal;
 use App\Models\Pengemudi;
 use App\Models\Penjemputan;
-use App\Models\PihakBerwenang;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,14 +25,15 @@ class PenjemputanFactory extends Factory
             'jadwal_id' => Jadwal::factory(),
             'anak_id' => Anak::factory(),
             'pengemudi_id' => Pengemudi::factory(),
-            'penjemput_id' => PihakBerwenang::factory()->penjemput(),
-            'penerima_id' => PihakBerwenang::factory()->penerima(),
             'tanggal' => $tanggal,
-            'status' => 'menunggu',
-            'kode_verifikasi' => fake()->numerify('######'),
+            'status' => 'dijadwalkan',
             'waktu_dijemput' => null,
             'waktu_berangkat' => null,
             'waktu_tiba' => null,
+            'foto_serah_sekolah' => null,
+            'foto_tiba' => null,
+            'waktu_konfirmasi_ortu' => null,
+            'dikonfirmasi_oleh' => null,
             'catatan' => null,
         ];
     }

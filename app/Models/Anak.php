@@ -19,6 +19,7 @@ class Anak extends Model
         'sekolah_id',
         'nama',
         'kelas',
+        'kode_qr',
     ];
 
     public function orangTua(): BelongsTo
@@ -29,11 +30,6 @@ class Anak extends Model
     public function sekolah(): BelongsTo
     {
         return $this->belongsTo(Sekolah::class);
-    }
-
-    public function pihakBerwenang(): HasMany
-    {
-        return $this->hasMany(PihakBerwenang::class);
     }
 
     public function jadwal(): HasMany
@@ -51,7 +47,7 @@ class Anak extends Model
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() || $user->isGuru()) {
             return $query;
         }
 
@@ -59,7 +55,14 @@ class Anak extends Model
             return $query->where('orang_tua_id', $user->id);
         }
 
-        // Pengemudi dan penerima tidak mendapat data anak secara langsung
+        if ($user->isPengemudi()) {
+            return $query->whereHas('penjemputan', function (Builder $q) use ($user) {
+                $q->whereHas('pengemudi', function (Builder $p) use ($user) {
+                    $p->where('user_id', $user->id);
+                });
+            });
+        }
+
         return $query->whereRaw('1 = 0');
     }
 }

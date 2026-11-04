@@ -76,11 +76,24 @@ class User extends Authenticatable
     }
 
     /**
-     * Helper cek peran.
+     * Relasi ke riwayat konfirmasi penjemputan oleh orang tua.
+     */
+    public function konfirmasiPenjemputan(): HasMany
+    {
+        return $this->hasMany(Penjemputan::class, 'dikonfirmasi_oleh');
+    }
+
+    /**
+     * Helper pengecekan peran.
      */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function isGuru(): bool
+    {
+        return $this->role === 'guru';
     }
 
     public function isOrangTua(): bool
@@ -91,10 +104,5 @@ class User extends Authenticatable
     public function isPengemudi(): bool
     {
         return $this->role === 'pengemudi';
-    }
-
-    public function isPenerima(): bool
-    {
-        return $this->role === 'penerima';
     }
 }

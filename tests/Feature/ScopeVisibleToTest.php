@@ -19,7 +19,7 @@ class ScopeVisibleToTest extends TestCase
     }
 
     /**
-     * Ortu1 hanya melihat anak miliknya lewat scope visibleTo.
+     * T-06: Ortu1 hanya melihat anak miliknya lewat scope visibleTo.
      */
     public function test_ortu1_hanya_melihat_anak_miliknya(): void
     {
@@ -34,19 +34,37 @@ class ScopeVisibleToTest extends TestCase
     }
 
     /**
-     * Admin dapat melihat seluruh data anak lewat scope visibleTo.
+     * Ortu2 hanya melihat anak miliknya lewat scope visibleTo.
      */
-    public function test_admin_melihat_semua_anak(): void
+    public function test_ortu2_hanya_melihat_anak_miliknya(): void
     {
-        $admin = User::where('email', 'admin@jemputaman.test')->first();
+        $ortu2 = User::where('email', 'ortu2@jemputaman.test')->first();
 
-        $anakList = Anak::visibleTo($admin)->get();
+        $anakList = Anak::visibleTo($ortu2)->get();
 
-        $this->assertCount(4, $anakList);
+        $this->assertCount(2, $anakList);
+        foreach ($anakList as $anak) {
+            $this->assertEquals($ortu2->id, $anak->orang_tua_id);
+        }
     }
 
     /**
-     * Pengemudi hanya melihat data penjemputan miliknya sendiri.
+     * Admin dan Guru dapat melihat seluruh data anak sekolah lewat scope visibleTo.
+     */
+    public function test_admin_dan_guru_melihat_semua_anak(): void
+    {
+        $admin = User::where('email', 'admin@jemputaman.test')->first();
+        $guru = User::where('email', 'guru@jemputaman.test')->first();
+
+        $anakAdmin = Anak::visibleTo($admin)->get();
+        $anakGuru = Anak::visibleTo($guru)->get();
+
+        $this->assertCount(4, $anakAdmin);
+        $this->assertCount(4, $anakGuru);
+    }
+
+    /**
+     * Pengemudi hanya melihat data penjemputan yang ditugaskan kepadanya.
      */
     public function test_pengemudi_hanya_melihat_penjemputan_miliknya(): void
     {
@@ -62,17 +80,54 @@ class ScopeVisibleToTest extends TestCase
     }
 
     /**
-     * Penerima hanya melihat penjemputan yang ditujukan kepada dirinya.
+     * Orang tua hanya melihat penjemputan anak mereka sendiri.
      */
-    public function test_penerima_hanya_melihat_penjemputan_yang_ditujukan_ke_dirinya(): void
+    public function test_orang_tua_hanya_melihat_penjemputan_anaknya(): void
     {
-        $penerima1 = User::where('email', 'penerima1@jemputaman.test')->first();
+        $ortu1 = User::where('email', 'ortu1@jemputaman.test')->first();
 
-        $penjemputanList = Penjemputan::visibleTo($penerima1)->get();
+        $penjemputanList = Penjemputan::visibleTo($ortu1)->get();
 
         $this->assertNotEmpty($penjemputanList);
         foreach ($penjemputanList as $penjemputan) {
-            $this->assertEquals($penerima1->id, $penjemputan->penerima->user_id);
+            $this->assertEquals($ortu1->id, $penjemputan->anak->orang_tua_id);
         }
+    }
+
+    /**
+     * T-03: Seluruh siswa memiliki kode QR unik.
+     */
+    public function test_seluruh_siswa_memiliki_kode_qr_unik(): void
+    {
+        $semuaAnak = Anak::all();
+
+        $this->assertCount(4, $semuaAnak);
+        $qrCodes = $semuaAnak->pluck('kode_qr')->all();
+
+        // Tidak boleh ada QR code kosong
+        foreach ($qrCodes as $qr) {
+            $this->assertNotEmpty($qr);
+            $this->assertStringStartsWith('QR-', $qr);
+        }
+
+        // Harus unik
+        $this->assertCount(count($qrCodes), array_unique($qrCodes));
+    }
+
+    /**
+     * T-05 & T-08: Penjemputan selesai memiliki catatan log GPS dan konfirmasi orang tua.
+     */
+    public function test_penjemputan_selesai_memiliki_log_gps_dan_konfirmasi_ortu(): void
+    {
+        $selesai = Penjemputan::where('status', Penjemputan::STATUS_SELESAI)->first();
+
+        $this->assertNotNull($selesai);
+        $this->assertNotNull($selesai->foto_serah_sekolah);
+        $this->assertNotNull($selesai->foto_tiba);
+        $this->assertNotNull($selesai->waktu_konfirmasi_ortu);
+        $this->assertNotNull($selesai->dikonfirmasi_oleh);
+
+        // Memastikan relasi ke log koordinat GPS
+        $this->assertGreaterThanOrEqual(1, $selesai->lokasiDriver()->count());
     }
 }

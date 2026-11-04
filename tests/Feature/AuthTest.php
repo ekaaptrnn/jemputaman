@@ -17,18 +17,17 @@ class AuthTest extends TestCase
     }
 
     /**
-     * T-01: Login berhasil untuk tiap peran dan diarahkan ke /dashboard.
+     * T-01: Login berhasil untuk tiap peran (admin, guru, orang_tua, pengemudi) dan diarahkan ke /dashboard.
      */
     public function test_login_berhasil_untuk_tiap_peran_dan_diarahkan_ke_dashboard(): void
     {
         $accounts = [
             'admin@jemputaman.test',
+            'guru@jemputaman.test',
             'ortu1@jemputaman.test',
             'ortu2@jemputaman.test',
             'driver1@jemputaman.test',
             'driver2@jemputaman.test',
-            'penerima1@jemputaman.test',
-            'penerima2@jemputaman.test',
         ];
 
         foreach ($accounts as $email) {

@@ -21,6 +21,7 @@ class AnakFactory extends Factory
             'sekolah_id' => Sekolah::factory(),
             'nama' => fake('id_ID')->name(),
             'kelas' => fake()->randomElement(['1A', '2B', '3C', '4A', '5B', '6C']),
+            'kode_qr' => 'QR-' . strtoupper(fake()->unique()->bothify('????-####')),
         ];
     }
 }

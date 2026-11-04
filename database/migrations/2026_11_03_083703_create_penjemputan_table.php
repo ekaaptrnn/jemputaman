@@ -14,17 +14,18 @@ return new class extends Migration
         Schema::create('penjemputan', function (Blueprint $table) {
             $table->id();
             $table->string('kode_perjalanan')->unique();
-            $table->foreignId('jadwal_id')->constrained('jadwal');
-            $table->foreignId('anak_id')->constrained('anak');
-            $table->foreignId('pengemudi_id')->constrained('pengemudi');
-            $table->foreignId('penjemput_id')->constrained('pihak_berwenang');
-            $table->foreignId('penerima_id')->constrained('pihak_berwenang');
+            $table->foreignId('jadwal_id')->constrained('jadwal')->cascadeOnDelete();
+            $table->foreignId('anak_id')->constrained('anak')->cascadeOnDelete();
+            $table->foreignId('pengemudi_id')->constrained('pengemudi')->cascadeOnDelete();
             $table->date('tanggal');
-            $table->string('status')->default('menunggu');
-            $table->string('kode_verifikasi', 6);
+            $table->string('status')->default('dijadwalkan');
             $table->dateTime('waktu_dijemput')->nullable();
             $table->dateTime('waktu_berangkat')->nullable();
             $table->dateTime('waktu_tiba')->nullable();
+            $table->string('foto_serah_sekolah')->nullable();
+            $table->string('foto_tiba')->nullable();
+            $table->dateTime('waktu_konfirmasi_ortu')->nullable();
+            $table->foreignId('dikonfirmasi_oleh')->nullable()->constrained('users')->nullOnDelete();
             $table->text('catatan')->nullable();
             $table->timestamps();
         });

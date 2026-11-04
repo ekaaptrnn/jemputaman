@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Penjemputan extends Model
 {
@@ -15,21 +14,38 @@ class Penjemputan extends Model
 
     protected $table = 'penjemputan';
 
-    public const DAFTAR_STATUS = ['menunggu', 'dijemput', 'dalam_perjalanan', 'tiba'];
+    public const STATUS_DIJADWALKAN = 'dijadwalkan';
+    public const STATUS_MENUJU_SEKOLAH = 'menuju_sekolah';
+    public const STATUS_DISERAHKAN = 'diserahkan';
+    public const STATUS_DALAM_PERJALANAN = 'dalam_perjalanan';
+    public const STATUS_TIBA = 'tiba';
+    public const STATUS_SELESAI = 'selesai';
+    public const STATUS_BERMASALAH = 'bermasalah';
+
+    public const DAFTAR_STATUS = [
+        self::STATUS_DIJADWALKAN,
+        self::STATUS_MENUJU_SEKOLAH,
+        self::STATUS_DISERAHKAN,
+        self::STATUS_DALAM_PERJALANAN,
+        self::STATUS_TIBA,
+        self::STATUS_SELESAI,
+        self::STATUS_BERMASALAH,
+    ];
 
     protected $fillable = [
         'kode_perjalanan',
         'jadwal_id',
         'anak_id',
         'pengemudi_id',
-        'penjemput_id',
-        'penerima_id',
         'tanggal',
         'status',
-        'kode_verifikasi',
         'waktu_dijemput',
         'waktu_berangkat',
         'waktu_tiba',
+        'foto_serah_sekolah',
+        'foto_tiba',
+        'waktu_konfirmasi_ortu',
+        'dikonfirmasi_oleh',
         'catatan',
     ];
 
@@ -38,6 +54,7 @@ class Penjemputan extends Model
         'waktu_dijemput' => 'datetime',
         'waktu_berangkat' => 'datetime',
         'waktu_tiba' => 'datetime',
+        'waktu_konfirmasi_ortu' => 'datetime',
     ];
 
     public function getRouteKeyName(): string
@@ -60,14 +77,9 @@ class Penjemputan extends Model
         return $this->belongsTo(Pengemudi::class);
     }
 
-    public function penjemput(): BelongsTo
+    public function dikonfirmasiOleh(): BelongsTo
     {
-        return $this->belongsTo(PihakBerwenang::class, 'penjemput_id');
-    }
-
-    public function penerima(): BelongsTo
-    {
-        return $this->belongsTo(PihakBerwenang::class, 'penerima_id');
+        return $this->belongsTo(User::class, 'dikonfirmasi_oleh');
     }
 
     public function riwayatStatus(): HasMany
@@ -75,9 +87,9 @@ class Penjemputan extends Model
         return $this->hasMany(RiwayatStatus::class);
     }
 
-    public function serahTerima(): HasOne
+    public function lokasiDriver(): HasMany
     {
-        return $this->hasOne(SerahTerima::class);
+        return $this->hasMany(LokasiDriver::class);
     }
 
     /**
@@ -85,7 +97,7 @@ class Penjemputan extends Model
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() || $user->isGuru()) {
             return $query;
         }
 
@@ -97,12 +109,6 @@ class Penjemputan extends Model
 
         if ($user->isPengemudi()) {
             return $query->whereHas('pengemudi', function (Builder $q) use ($user) {
-                $q->where('user_id', $user->id);
-            });
-        }
-
-        if ($user->isPenerima()) {
-            return $query->whereHas('penerima', function (Builder $q) use ($user) {
                 $q->where('user_id', $user->id);
             });
         }

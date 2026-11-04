@@ -51,6 +51,13 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function guru(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'guru',
+        ]);
+    }
+
     public function orangTua(): static
     {
         return $this->state(fn (array $attributes) => [
@@ -62,13 +69,6 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => 'pengemudi',
-        ]);
-    }
-
-    public function penerima(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'role' => 'penerima',
         ]);
     }
 }
