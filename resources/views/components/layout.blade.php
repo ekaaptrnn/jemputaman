@@ -139,6 +139,17 @@
                                 <span>Daftar Siswa Jemputan</span>
                             </a>
                         @endif
+
+                        @if(auth()->user()->isPengemudi())
+                            <div class="pt-4 px-3 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                Tugas Driver
+                            </div>
+                            <a href="{{ route('driver.penjemputan.index') }}"
+                                class="flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium text-sm transition {{ request()->routeIs('driver.*') ? 'bg-brand-600 text-white shadow-sm shadow-brand-500/30' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                                <i class="fa-solid fa-route w-5 text-center"></i>
+                                <span>Jemputan Hari Ini</span>
+                            </a>
+                        @endif
                     @endauth
                 </div>
             </aside>
