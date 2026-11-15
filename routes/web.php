@@ -4,6 +4,7 @@ use App\Http\Controllers\AnakController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\PenjemputanController;
 use App\Http\Controllers\PengemudiController;
 use App\Http\Controllers\SekolahController;
 use Illuminate\Support\Facades\Route;
@@ -49,3 +50,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/sekolah', [SekolahController::class, 'edit'])->name('sekolah.edit');
     Route::put('/sekolah', [SekolahController::class, 'update'])->name('sekolah.update');
 });
+
+// Fase 2 — Operasional Pengemudi (jemputan hari ini, scan QR, upload foto bukti)
+Route::middleware(['auth', 'role:pengemudi'])->prefix('driver')->name('driver.')->group(function () {
+    Route::get('/penjemputan', [PenjemputanController::class, 'index'])->name('penjemputan.index');
+    Route::get('/penjemputan/{penjemputan}', [PenjemputanController::class, 'show'])->name('penjemputan.show');
+    Route::post('/penjemputan/{penjemputan}/berangkat', [PenjemputanController::class, 'berangkat'])->name('penjemputan.berangkat');
+    Route::post('/penjemputan/{penjemputan}/serah-terima', [PenjemputanController::class, 'serahTerima'])->name('penjemputan.serah-terima');
+    Route::post('/penjemputan/{penjemputan}/mulai', [PenjemputanController::class, 'mulaiPerjalanan'])->name('penjemputan.mulai');
+    Route::post('/penjemputan/{penjemputan}/tiba', [PenjemputanController::class, 'tiba'])->name('penjemputan.tiba');
+});
+
+// Foto bukti dari storage privat, disajikan dengan otorisasi (scope visibleTo)
+Route::get('/penjemputan/{penjemputan}/foto/{jenis}', [PenjemputanController::class, 'foto'])
+    ->whereIn('jenis', ['serah', 'tiba'])
+    ->middleware('auth')
+    ->name('penjemputan.foto');
