@@ -106,6 +106,109 @@
                 @break
 
             @case('dalam_perjalanan')
+                {{-- Fase 3: pengirim koordinat GPS (aktif hanya saat status dalam_perjalanan) --}}
+                <div class="mb-5 p-4 rounded-xl bg-blue-50 border border-blue-100">
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="text-sm font-semibold text-blue-900"><i class="fa-solid fa-satellite-dish mr-2"></i>Pelacakan GPS</div>
+                        <span id="gps-status" class="text-xs font-semibold text-slate-500">Menyiapkan…</span>
+                    </div>
+                    <p id="gps-detail" class="text-xs text-slate-500 mt-1">Biarkan halaman ini terbuka agar orang tua bisa memantau posisi armada.</p>
+                    <button type="button" id="btn-simulasi" class="mt-3 inline-flex items-center px-3 py-2 bg-slate-700 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold">
+                        <i class="fa-solid fa-flask mr-2"></i>Mode Simulasi (untuk demo)
+                    </button>
+                </div>
+
+                <script>
+                    (function () {
+                        const URL_KIRIM = @json(route('penjemputan.lokasi.store', $p));
+                        const CSRF = @json(csrf_token());
+                        const JEDA_KIRIM_MS = 6000; // sesuai rancangan: kirim tiap 5-10 detik
+                        const elStatus = document.getElementById('gps-status');
+                        const elDetail = document.getElementById('gps-detail');
+                        const tombolSim = document.getElementById('btn-simulasi');
+
+                        let terakhirKirim = 0;
+                        let watchId = null;
+                        let timerSimulasi = null;
+
+                        function tampil(status, detail, warna) {
+                            elStatus.textContent = status;
+                            elStatus.className = 'text-xs font-semibold ' + (warna || 'text-slate-500');
+                            if (detail) elDetail.textContent = detail;
+                        }
+
+                        async function kirim(lat, lng) {
+                            try {
+                                const res = await fetch(URL_KIRIM, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': CSRF
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({ latitude: lat, longitude: lng })
+                                });
+                                if (res.status === 429) { tampil('Terlalu sering', 'Server membatasi frekuensi kirim. Menunggu giliran berikutnya.', 'text-amber-600'); return; }
+                                if (!res.ok) { const e = await res.json().catch(() => ({})); tampil('Gagal kirim', e.pesan || ('HTTP ' + res.status), 'text-rose-600'); return; }
+                                tampil('Terkirim ' + new Date().toLocaleTimeString('id-ID'), lat.toFixed(5) + ', ' + lng.toFixed(5), 'text-emerald-600');
+                            } catch (e) {
+                                tampil('Offline', 'Koneksi terputus, mencoba lagi pada titik berikutnya.', 'text-rose-600');
+                            }
+                        }
+
+                        // --- GPS asli: navigator.geolocation.watchPosition (butuh HTTPS atau localhost) ---
+                        function mulaiGpsAsli() {
+                            if (!('geolocation' in navigator)) {
+                                tampil('GPS tidak didukung', 'Browser ini tidak mendukung Geolocation. Pakai Mode Simulasi.', 'text-rose-600');
+                                return;
+                            }
+                            if (!window.isSecureContext) {
+                                tampil('Butuh HTTPS', 'Geolocation ditolak di http://IP-laptop. Pakai HTTPS/tunnel, localhost, atau Mode Simulasi.', 'text-amber-600');
+                                return;
+                            }
+                            watchId = navigator.geolocation.watchPosition(
+                                function (pos) {
+                                    const sekarang = Date.now();
+                                    if (sekarang - terakhirKirim < JEDA_KIRIM_MS) return;
+                                    terakhirKirim = sekarang;
+                                    kirim(pos.coords.latitude, pos.coords.longitude);
+                                },
+                                function (err) {
+                                    const pesan = { 1: 'Izin lokasi ditolak. Aktifkan izin lokasi di browser.', 2: 'Posisi tidak tersedia.', 3: 'Waktu menunggu GPS habis.' };
+                                    tampil('GPS error', pesan[err.code] || err.message, 'text-rose-600');
+                                },
+                                { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
+                            );
+                            tampil('Mencari sinyal…', null, 'text-blue-600');
+                        }
+
+                        // --- Mode simulasi: rute dummy di Surakarta, untuk demo tanpa HTTPS ---
+                        const RUTE = [
+                            [-7.5582, 110.8205], [-7.5590, 110.8216], [-7.5601, 110.8228], [-7.5614, 110.8240],
+                            [-7.5628, 110.8252], [-7.5640, 110.8266], [-7.5652, 110.8281], [-7.5663, 110.8297],
+                            [-7.5670, 110.8320], [-7.5679, 110.8338]
+                        ];
+                        function toggleSimulasi() {
+                            if (timerSimulasi) {
+                                clearInterval(timerSimulasi); timerSimulasi = null;
+                                tombolSim.innerHTML = '<i class="fa-solid fa-flask mr-2"></i>Mode Simulasi (untuk demo)';
+                                tampil('Simulasi berhenti', null);
+                                return;
+                            }
+                            if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+                            let i = 0;
+                            const langkah = function () { kirim(RUTE[i][0], RUTE[i][1]); i = (i + 1) % RUTE.length; };
+                            langkah();
+                            timerSimulasi = setInterval(langkah, JEDA_KIRIM_MS);
+                            tombolSim.innerHTML = '<i class="fa-solid fa-stop mr-2"></i>Hentikan Simulasi';
+                        }
+
+                        tombolSim.addEventListener('click', toggleSimulasi);
+                        mulaiGpsAsli();
+                    })();
+                </script>
+
                 <form method="POST" action="{{ route('driver.penjemputan.tiba', $p) }}" enctype="multipart/form-data" class="space-y-4">
                     @csrf
                     <div>
