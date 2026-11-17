@@ -4,6 +4,7 @@ use App\Http\Controllers\AnakController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\LokasiController;
 use App\Http\Controllers\PenjemputanController;
 use App\Http\Controllers\PengemudiController;
 use App\Http\Controllers\SekolahController;
@@ -66,3 +67,19 @@ Route::get('/penjemputan/{penjemputan}/foto/{jenis}', [PenjemputanController::cl
     ->whereIn('jenis', ['serah', 'tiba'])
     ->middleware('auth')
     ->name('penjemputan.foto');
+
+// Fase 3 — Live GPS Tracking (Leaflet + OpenStreetMap)
+// Kirim koordinat: hanya pengemudi, dibatasi throttle 'lokasi' (lihat AppServiceProvider).
+Route::post('/penjemputan/{penjemputan}/lokasi', [LokasiController::class, 'store'])
+    ->middleware(['auth', 'role:pengemudi', 'throttle:lokasi'])
+    ->name('penjemputan.lokasi.store');
+
+// Koordinat terakhir (JSON) untuk polling peta; akses disaring scope visibleTo di controller.
+Route::get('/penjemputan/{penjemputan}/lokasi-terkini', [LokasiController::class, 'terkini'])
+    ->middleware('auth')
+    ->name('penjemputan.lokasi.terkini');
+
+// Halaman peta pemantauan: orang tua, guru, admin.
+Route::get('/penjemputan/{penjemputan}/lacak', [LokasiController::class, 'lacak'])
+    ->middleware(['auth', 'role:orang_tua,guru,admin'])
+    ->name('penjemputan.lacak');

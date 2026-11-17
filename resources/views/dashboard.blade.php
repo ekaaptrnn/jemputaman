@@ -87,6 +87,112 @@
         </div>
     @endif
 
+    @if(auth()->user()->isAdmin())
+        <!-- Fase 3: Rekap perjalanan hari ini (admin) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-sm">
+                <span class="text-xs font-medium text-slate-500 block">Sedang Dalam Perjalanan</span>
+                <span class="text-2xl font-bold text-blue-700">{{ $stats['dalam_perjalanan'] }}</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+                <span class="text-xs font-medium text-slate-500 block">Menunggu Konfirmasi Ortu</span>
+                <span class="text-2xl font-bold text-amber-700">{{ $stats['menunggu_konfirmasi'] }}</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-emerald-200 shadow-sm">
+                <span class="text-xs font-medium text-slate-500 block">Selesai Hari Ini</span>
+                <span class="text-2xl font-bold text-emerald-700">{{ $stats['selesai'] }}</span>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border border-rose-200 shadow-sm">
+                <span class="text-xs font-medium text-slate-500 block">Bermasalah</span>
+                <span class="text-2xl font-bold text-rose-700">{{ $stats['bermasalah'] }}</span>
+            </div>
+        </div>
+    @endif
+
+    @if(auth()->user()->isGuru())
+        <!-- Fase 3: Dashboard Guru — pemantauan gerbang piket -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm mb-6">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
+                <i class="fa-solid fa-door-open mr-1 text-emerald-600"></i> Pemantauan Gerbang Piket
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                <div class="rounded-xl bg-slate-50 p-3"><div class="text-2xl font-bold text-slate-900">{{ $stats['penjemputan_hari_ini'] }}</div><div class="text-xs text-slate-500">Total jemputan</div></div>
+                <div class="rounded-xl bg-blue-50 p-3"><div class="text-2xl font-bold text-blue-700">{{ $stats['dalam_perjalanan'] }}</div><div class="text-xs text-slate-500">Di jalan</div></div>
+                <div class="rounded-xl bg-amber-50 p-3"><div class="text-2xl font-bold text-amber-700">{{ $stats['menunggu_konfirmasi'] }}</div><div class="text-xs text-slate-500">Tunggu konfirmasi</div></div>
+                <div class="rounded-xl bg-emerald-50 p-3"><div class="text-2xl font-bold text-emerald-700">{{ $stats['selesai'] }}</div><div class="text-xs text-slate-500">Selesai</div></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">Klik <strong>Lacak</strong> pada perjalanan berstatus "Dalam Perjalanan" untuk melihat posisi armada di peta.</p>
+        </div>
+    @endif
+
+    @if(auth()->user()->isPengemudi())
+        <!-- Fase 3: Dashboard Driver — menu tugas harian -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm mb-6">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
+                <i class="fa-solid fa-route mr-1 text-amber-600"></i> Tugas Harian Anda
+            </h2>
+            @if($tugasBerikutnya)
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-amber-50 border border-amber-100">
+                    <div>
+                        <div class="text-xs text-amber-700 font-semibold uppercase">Tugas berikutnya</div>
+                        <div class="font-bold text-slate-900">{{ $tugasBerikutnya->anak->nama }} · Kelas {{ $tugasBerikutnya->anak->kelas }}</div>
+                        <div class="text-xs text-slate-500">Jemput {{ \Illuminate\Support\Str::of($tugasBerikutnya->jadwal->jam_jemput)->substr(0, 5) }} · {{ $tugasBerikutnya->jadwal->titik_jemput }}</div>
+                    </div>
+                    <a href="{{ route('driver.penjemputan.show', $tugasBerikutnya) }}" class="inline-flex items-center justify-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition">
+                        <i class="fa-solid fa-play mr-2 text-xs"></i>Buka Tugas
+                    </a>
+                </div>
+            @else
+                <p class="text-sm text-slate-500">Tidak ada tugas yang menunggu. Semua perjalanan hari ini sudah selesai atau belum dijadwalkan.</p>
+            @endif
+            <a href="{{ route('driver.penjemputan.index') }}" class="inline-block mt-3 text-sm font-semibold text-brand-600 hover:text-brand-700">Lihat semua jemputan hari ini &rarr;</a>
+        </div>
+    @endif
+
+    @if(auth()->user()->isOrangTua())
+        <!-- Fase 3: Dashboard Orang Tua — status anak & tombol live tracking -->
+        <div class="mb-6">
+            <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
+                <i class="fa-solid fa-children mr-1 text-blue-600"></i> Anak Saya
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                @forelse($anakSaya as $anak)
+                    @php $jemputan = $penjemputanHariIni->firstWhere('anak_id', $anak->id); @endphp
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="font-bold text-slate-900">{{ $anak->nama }}</div>
+                                <div class="text-xs text-slate-500">Kelas {{ $anak->kelas }}</div>
+                            </div>
+                            @if($jemputan)
+                                @include('driver._badge', ['status' => $jemputan->status])
+                            @else
+                                <span class="inline-flex px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-500">Tidak ada jemputan</span>
+                            @endif
+                        </div>
+
+                        @if($jemputan)
+                            <div class="mt-3 text-sm text-slate-600">
+                                <i class="fa-solid fa-van-shuttle w-5 text-slate-400"></i>{{ $jemputan->pengemudi->user->name ?? '-' }} ({{ $jemputan->pengemudi->no_kendaraan ?? '-' }})
+                            </div>
+                            @if($jemputan->status === 'dalam_perjalanan')
+                                <a href="{{ route('penjemputan.lacak', $jemputan) }}" class="mt-4 w-full inline-flex items-center justify-center px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition">
+                                    <i class="fa-solid fa-location-crosshairs mr-2"></i>Lacak Sekarang
+                                </a>
+                            @elseif($jemputan->status === 'tiba')
+                                <p class="mt-3 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">Armada sudah tiba. Konfirmasi penerimaan tersedia di tahap berikutnya.</p>
+                            @endif
+                        @else
+                            <p class="mt-3 text-xs text-slate-400">Belum ada perjalanan penjemputan hari ini.</p>
+                        @endif
+                    </div>
+                @empty
+                    <div class="sm:col-span-2 bg-white rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">Belum ada data anak yang terhubung dengan akun Anda.</div>
+                @endforelse
+            </div>
+        </div>
+    @endif
+
     <!-- Tabel Monitoring Penjemputan Hari Ini -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-5 border-b border-slate-100 flex justify-between items-center">
@@ -107,6 +213,7 @@
                         <th class="px-5 py-3.5">Siswa</th>
                         <th class="px-5 py-3.5">Armada Driver</th>
                         <th class="px-5 py-3.5">Status</th>
+                        <th class="px-5 py-3.5">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -139,10 +246,21 @@
                                     {{ strtoupper(str_replace('_', ' ', $item->status)) }}
                                 </span>
                             </td>
+                            <td class="px-5 py-4">
+                                @if(auth()->user()->isPengemudi())
+                                    <a href="{{ route('driver.penjemputan.show', $item) }}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Buka</a>
+                                @elseif($item->status === 'dalam_perjalanan')
+                                    <a href="{{ route('penjemputan.lacak', $item) }}" class="inline-flex items-center px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold">
+                                        <i class="fa-solid fa-location-crosshairs mr-1.5"></i>Lacak
+                                    </a>
+                                @else
+                                    <span class="text-xs text-slate-300">—</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-5 py-8 text-center text-slate-400">
+                            <td colspan="5" class="px-5 py-8 text-center text-slate-400">
                                 <i class="fa-solid fa-inbox text-3xl mb-2 block"></i>
                                 Belum ada transaksi penjemputan untuk hari ini.
                             </td>
