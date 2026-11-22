@@ -180,7 +180,12 @@
                                     <i class="fa-solid fa-location-crosshairs mr-2"></i>Lacak Sekarang
                                 </a>
                             @elseif($jemputan->status === 'tiba')
-                                <p class="mt-3 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">Armada sudah tiba. Konfirmasi penerimaan tersedia di tahap berikutnya.</p>
+                                <p class="mt-3 text-xs text-amber-700 bg-amber-50 rounded-lg px-3 py-2">Armada sudah tiba. Silakan periksa foto bukti dan konfirmasi penerimaan Ananda.</p>
+                                <a href="{{ route('konfirmasi.show', $jemputan) }}" class="mt-3 w-full inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition">
+                                    <i class="fa-solid fa-circle-check mr-2"></i>Konfirmasi Penerimaan
+                                </a>
+                            @elseif(in_array($jemputan->status, ['selesai', 'bermasalah'], true))
+                                <a href="{{ route('konfirmasi.show', $jemputan) }}" class="mt-3 inline-flex text-xs font-semibold text-brand-600 hover:text-brand-700">Lihat detail &rarr;</a>
                             @endif
                         @else
                             <p class="mt-3 text-xs text-slate-400">Belum ada perjalanan penjemputan hari ini.</p>
@@ -249,6 +254,10 @@
                             <td class="px-5 py-4">
                                 @if(auth()->user()->isPengemudi())
                                     <a href="{{ route('driver.penjemputan.show', $item) }}" class="text-xs font-semibold text-brand-600 hover:text-brand-700">Buka</a>
+                                @elseif($item->status === 'tiba' && auth()->user()->isOrangTua())
+                                    <a href="{{ route('konfirmasi.show', $item) }}" class="inline-flex items-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold">
+                                        <i class="fa-solid fa-circle-check mr-1.5"></i>Konfirmasi
+                                    </a>
                                 @elseif($item->status === 'dalam_perjalanan')
                                     <a href="{{ route('penjemputan.lacak', $item) }}" class="inline-flex items-center px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-semibold">
                                         <i class="fa-solid fa-location-crosshairs mr-1.5"></i>Lacak

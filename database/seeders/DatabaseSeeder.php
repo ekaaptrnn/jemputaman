@@ -264,6 +264,68 @@ class DatabaseSeeder extends Seeder
 
         RiwayatStatus::create(['penjemputan_id' => $p4->id, 'diubah_oleh' => $admin->id, 'status' => 'dijadwalkan', 'waktu' => Carbon::now(), 'catatan' => 'Jadwal besok telah diterbitkan']);
 
+        // ---------------------------------------------------------------------------------
+        // Fase 4 — contoh perjalanan tambahan agar SEMUA status punya contoh data.
+        // Jumlah siswa tetap 4 (dikunci ScopeVisibleToTest); perjalanan tambahan memakai siswa yang ada.
+        // Status "selesai" sengaja tidak ditambah: Penjemputan 1 sudah menjadi contoh lengkapnya.
+        // ---------------------------------------------------------------------------------
+        $yesterday = $today->copy()->subDay();
+        $yesterdayStr = $yesterday->format('Ymd');
+
+        // Penjemputan 5: MENUJU SEKOLAH (Nadhira, hari ini) - bisa dipakai demo driver 2: scan QR-NADHIRA-004 + foto serah terima
+        $p5 = Penjemputan::create([
+            'kode_perjalanan' => 'JA-' . $dateStr . '-005',
+            'jadwal_id' => $jadwal4->id,
+            'anak_id' => $anak4->id,
+            'pengemudi_id' => $driver2->id,
+            'tanggal' => $today->toDateString(),
+            'status' => Penjemputan::STATUS_MENUJU_SEKOLAH,
+            'catatan' => 'Armada 2 sedang menuju sekolah untuk menjemput Nadhira.',
+        ]);
+
+        RiwayatStatus::create(['penjemputan_id' => $p5->id, 'diubah_oleh' => $admin->id, 'status' => 'dijadwalkan', 'waktu' => Carbon::now()->subHours(2), 'catatan' => 'Jadwal harian dibuat']);
+        RiwayatStatus::create(['penjemputan_id' => $p5->id, 'diubah_oleh' => $driverUser2->id, 'status' => 'menuju_sekolah', 'waktu' => Carbon::now()->subMinutes(10), 'catatan' => 'Armada berangkat menuju sekolah.']);
+
+        // Penjemputan 6: BERMASALAH (Rayyan, kemarin) - orang tua melapor kendala saat status "tiba"
+        $p6 = Penjemputan::create([
+            'kode_perjalanan' => 'JA-' . $yesterdayStr . '-006',
+            'jadwal_id' => $jadwal1->id,
+            'anak_id' => $anak1->id,
+            'pengemudi_id' => $driver1->id,
+            'tanggal' => $yesterday->toDateString(),
+            'status' => Penjemputan::STATUS_BERMASALAH,
+            'waktu_dijemput' => $yesterday->copy()->setTime(13, 0),
+            'waktu_berangkat' => $yesterday->copy()->setTime(13, 5),
+            'waktu_tiba' => $yesterday->copy()->setTime(13, 30),
+            'foto_serah_sekolah' => 'bukti_penjemputan/serah_rayyan_' . $yesterdayStr . '.jpg',
+            'foto_tiba' => 'bukti_penjemputan/tiba_rayyan_' . $yesterdayStr . '.jpg',
+            'catatan' => '[Laporan orang tua] Anak diturunkan di depan gang, bukan di depan rumah.',
+        ]);
+
+        RiwayatStatus::create(['penjemputan_id' => $p6->id, 'diubah_oleh' => $admin->id, 'status' => 'dijadwalkan', 'waktu' => $yesterday->copy()->setTime(11, 0), 'catatan' => 'Jadwal harian dibuat']);
+        RiwayatStatus::create(['penjemputan_id' => $p6->id, 'diubah_oleh' => $driverUser1->id, 'status' => 'menuju_sekolah', 'waktu' => $yesterday->copy()->setTime(12, 50), 'catatan' => 'Armada berangkat menuju sekolah.']);
+        RiwayatStatus::create(['penjemputan_id' => $p6->id, 'diubah_oleh' => $driverUser1->id, 'status' => 'diserahkan', 'waktu' => $yesterday->copy()->setTime(13, 0), 'catatan' => 'Scan QR valid dan foto serah terima diunggah.']);
+        RiwayatStatus::create(['penjemputan_id' => $p6->id, 'diubah_oleh' => $driverUser1->id, 'status' => 'dalam_perjalanan', 'waktu' => $yesterday->copy()->setTime(13, 5), 'catatan' => 'Armada meninggalkan sekolah menuju rumah siswa.']);
+        RiwayatStatus::create(['penjemputan_id' => $p6->id, 'diubah_oleh' => $driverUser1->id, 'status' => 'tiba', 'waktu' => $yesterday->copy()->setTime(13, 30), 'catatan' => 'Armada tiba di rumah siswa, foto kedatangan diunggah.']);
+        RiwayatStatus::create(['penjemputan_id' => $p6->id, 'diubah_oleh' => $ortu1->id, 'status' => 'bermasalah', 'waktu' => $yesterday->copy()->setTime(13, 35), 'catatan' => 'Orang tua melaporkan kendala: Anak diturunkan di depan gang, bukan di depan rumah.']);
+
+        // Penjemputan 7: DISERAHKAN (Kenzo, kemarin) - contoh data lama yang berhenti di status "diserahkan"
+        $p7 = Penjemputan::create([
+            'kode_perjalanan' => 'JA-' . $yesterdayStr . '-007',
+            'jadwal_id' => $jadwal3->id,
+            'anak_id' => $anak3->id,
+            'pengemudi_id' => $driver2->id,
+            'tanggal' => $yesterday->toDateString(),
+            'status' => Penjemputan::STATUS_DISERAHKAN,
+            'waktu_dijemput' => $yesterday->copy()->setTime(13, 15),
+            'foto_serah_sekolah' => 'bukti_penjemputan/serah_kenzo_' . $yesterdayStr . '.jpg',
+            'catatan' => 'Contoh status diserahkan (belum dilanjutkan ke perjalanan).',
+        ]);
+
+        RiwayatStatus::create(['penjemputan_id' => $p7->id, 'diubah_oleh' => $admin->id, 'status' => 'dijadwalkan', 'waktu' => $yesterday->copy()->setTime(11, 0), 'catatan' => 'Jadwal harian dibuat']);
+        RiwayatStatus::create(['penjemputan_id' => $p7->id, 'diubah_oleh' => $driverUser2->id, 'status' => 'menuju_sekolah', 'waktu' => $yesterday->copy()->setTime(13, 5), 'catatan' => 'Armada berangkat menuju sekolah.']);
+        RiwayatStatus::create(['penjemputan_id' => $p7->id, 'diubah_oleh' => $driverUser2->id, 'status' => 'diserahkan', 'waktu' => $yesterday->copy()->setTime(13, 15), 'catatan' => 'Scan QR valid dan foto serah terima diunggah.']);
+
         // 6. Notifikasi Dalam Aplikasi
         Notifikasi::create([
             'user_id' => $ortu1->id,
@@ -296,5 +358,32 @@ class DatabaseSeeder extends Seeder
             'isi' => 'Penyerahan siswa di gerbang sekolah telah divalidasi oleh driver menggunakan scan kode QR.',
             'dibaca_at' => Carbon::now()->subMinutes(30),
         ]);
+
+        // Fase 4 — contoh notifikasi tambahan (menuju sekolah & kendala)
+        Notifikasi::create([
+            'user_id' => $ortu2->id,
+            'penjemputan_id' => $p5->id,
+            'judul' => 'Armada Menuju Sekolah',
+            'isi' => 'Armada penjemputan Ananda Nadhira Putri Rahma sedang menuju sekolah.',
+            'dibaca_at' => null,
+        ]);
+
+        Notifikasi::create([
+            'user_id' => $ortu1->id,
+            'penjemputan_id' => $p6->id,
+            'judul' => 'Laporan Kendala Tercatat',
+            'isi' => 'Laporan kendala untuk Ananda Muhammad Rayyan Santoso sudah diteruskan ke pihak sekolah. Catatan Anda: Anak diturunkan di depan gang, bukan di depan rumah.',
+            'dibaca_at' => Carbon::now()->subHours(20),
+        ]);
+
+        foreach ([$guru, $admin] as $penerima) {
+            Notifikasi::create([
+                'user_id' => $penerima->id,
+                'penjemputan_id' => $p6->id,
+                'judul' => 'Kendala Penjemputan Dilaporkan',
+                'isi' => 'Orang tua melaporkan kendala pada penjemputan Ananda Muhammad Rayyan Santoso (' . $p6->kode_perjalanan . '). Catatan: Anak diturunkan di depan gang, bukan di depan rumah.',
+                'dibaca_at' => null,
+            ]);
+        }
     }
 }
