@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Penjemputan;
 use App\Models\RiwayatStatus;
+use App\Services\NotifikasiPenjemputan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,8 @@ use Throwable;
  *
  * Transisi yang ditangani (lihat docs/JemputAman_Perancangan_RPL_Revisi.md §3.2):
  *   dijadwalkan -> menuju_sekolah -> diserahkan -> dalam_perjalanan -> tiba
- * Transisi tiba -> selesai / bermasalah adalah jatah Orang Tua (Fase 4).
+ * Transisi tiba -> selesai / bermasalah adalah jatah Orang Tua (Fase 4), lihat KonfirmasiController.
+ * Setiap perubahan status di sini juga mencatat notifikasi untuk orang tua (NotifikasiPenjemputan).
  */
 class PenjemputanController extends Controller
 {
@@ -244,6 +246,9 @@ class PenjemputanController extends Controller
                     'waktu' => now(),
                     'catatan' => $catatan,
                 ]);
+
+                // Fase 4: kabari orang tua (di dalam transaksi yang sama).
+                NotifikasiPenjemputan::statusBerubah($terkini, $statusBaru);
             });
         } catch (Throwable $e) {
             if ($fileBaru) {

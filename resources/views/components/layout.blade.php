@@ -56,6 +56,15 @@
                 <!-- User Info & Action -->
                 <div class="flex items-center space-x-4">
                     @auth
+                        {{-- Fase 4: lonceng notifikasi + badge jumlah yang belum dibaca --}}
+                        @php $jumlahNotifBaru = auth()->user()->notifikasi()->whereNull('dibaca_at')->count(); @endphp
+                        <a href="{{ route('notifikasi.index') }}" title="Notifikasi" class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition">
+                            <i class="fa-regular fa-bell text-lg"></i>
+                            @if($jumlahNotifBaru > 0)
+                                <span data-notif-badge class="absolute -top-0.5 -right-0.5 min-w-[1.25rem] h-5 px-1 rounded-full bg-rose-600 text-white text-[10px] font-bold flex items-center justify-center">{{ $jumlahNotifBaru > 99 ? '99+' : $jumlahNotifBaru }}</span>
+                            @endif
+                        </a>
+
                         <div class="hidden sm:flex flex-col text-right">
                             <span class="text-sm font-semibold text-slate-800">{{ auth()->user()->name }}</span>
                             <span class="text-xs uppercase tracking-wider font-bold 

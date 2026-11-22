@@ -4,7 +4,9 @@ use App\Http\Controllers\AnakController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JadwalController;
+use App\Http\Controllers\KonfirmasiController;
 use App\Http\Controllers\LokasiController;
+use App\Http\Controllers\NotifikasiController;
 use App\Http\Controllers\PenjemputanController;
 use App\Http\Controllers\PengemudiController;
 use App\Http\Controllers\SekolahController;
@@ -83,3 +85,18 @@ Route::get('/penjemputan/{penjemputan}/lokasi-terkini', [LokasiController::class
 Route::get('/penjemputan/{penjemputan}/lacak', [LokasiController::class, 'lacak'])
     ->middleware(['auth', 'role:orang_tua,guru,admin'])
     ->name('penjemputan.lacak');
+
+// Fase 4 — Konfirmasi serah terima oleh Orang Tua (tiba -> selesai / bermasalah)
+// Role dibatasi orang_tua; kepemilikan anak diperiksa di controller (scope visibleTo) -> T-09.
+Route::middleware(['auth', 'role:orang_tua'])->prefix('konfirmasi')->name('konfirmasi.')->group(function () {
+    Route::get('/{penjemputan}', [KonfirmasiController::class, 'show'])->name('show');
+    Route::post('/{penjemputan}/terima', [KonfirmasiController::class, 'terima'])->name('terima');
+    Route::post('/{penjemputan}/laporkan', [KonfirmasiController::class, 'laporkan'])->name('laporkan');
+});
+
+// Fase 4 — Notifikasi dalam aplikasi (semua peran, hanya milik sendiri)
+Route::middleware('auth')->prefix('notifikasi')->name('notifikasi.')->group(function () {
+    Route::get('/', [NotifikasiController::class, 'index'])->name('index');
+    Route::post('/baca-semua', [NotifikasiController::class, 'bacaSemua'])->name('baca-semua');
+    Route::post('/{notifikasi}/baca', [NotifikasiController::class, 'baca'])->name('baca');
+});
